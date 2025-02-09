@@ -8,19 +8,24 @@ import StreamItem from './StreamItem';
 
 type ChatProps = {
   className?: string;
+  levelId: string;
   getNFTs: () => void;
   getTokens: () => void;
+  conversationId : string
+  onGoalEvaluation : (messages : AgentMessage[]) => void
 };
 
-export default function Chat({ className, getNFTs, getTokens }: ChatProps) {
+export default function Chat({ className, getNFTs, getTokens, levelId, onGoalEvaluation, conversationId }: ChatProps) {
   const [userInput, setUserInput] = useState('');
   const [streamEntries, setStreamEntries] = useState<StreamEntry[]>([]);
-  const conversationId = useMemo(() => {
-    return generateUUID();
-  }, []);
 
   const [shouldRefetchNFTs, setShouldRefetchNFTs] = useState(false);
   const [shouldRefetchTokens, setShouldRefetchTokens] = useState(false);
+
+  useMemo(() => {
+    setUserInput('')
+    setStreamEntries([])
+  }, [conversationId]);
 
   useEffect(() => {
     if (shouldRefetchNFTs) {
@@ -37,16 +42,29 @@ export default function Chat({ className, getNFTs, getTokens }: ChatProps) {
   }, [getTokens, shouldRefetchTokens]);
 
   const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [streamEntries]);
 
   const handleSuccess = useCallback((messages: AgentMessage[]) => {
     const functions =
       messages?.find((msg) => msg.event === 'tools')?.functions || [];
-    if (functions?.includes('deploy_nft')) {
+
+      if (functions?.includes('deploy_nft')) {
       setShouldRefetchNFTs(true);
     }
+
     if (functions?.includes('deploy_token')) {
       setShouldRefetchTokens(true);
     }
+
+    onGoalEvaluation(messages)
 
     let message = messages.find((res) => res.event === 'agent');
     if (!message) {
@@ -64,6 +82,7 @@ export default function Chat({ className, getNFTs, getTokens }: ChatProps) {
   }, []);
 
   const { postChat, isLoading } = useChat({
+    levelId : levelId,
     onSuccess: handleSuccess,
     conversationId,
   });
@@ -100,33 +119,17 @@ export default function Chat({ className, getNFTs, getTokens }: ChatProps) {
     [handleSubmit],
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Dependency is required
-  useEffect(() => {
-    // scrolls to the bottom of the chat when messages change
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [streamEntries]);
-
   return (
-    <div
-      className={cn(
-        'flex h-full w-full flex-col border-[#5788FA]/50 md:flex md:w-1/2 md:border-r',
-        className,
-      )}
-    >
-      <div className="flex grow flex-col overflow-y-auto p-4 pb-20">
-        <p className="text-zinc-500">What&apos;s on your mind...</p>
-        <div className="mt-4 space-y-2" role="log" aria-live="polite">
-          {streamEntries.map((entry, index) => (
-            <StreamItem
-              key={`${entry.timestamp.toDateString()}-${index}`}
-              entry={entry}
-            />
-          ))}
-        </div>
-
-        <div className="mt-3" ref={bottomRef} />
+    <div className="flex flex-col h-full overflow-hidden bg-gray-900 rounded-lg">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {streamEntries.map((entry, index) => (
+          <StreamItem
+            key={`${entry.timestamp.toDateString()}-${index}`}
+            entry={entry}
+          />
+        ))}
+        <div ref={messagesEndRef} />
       </div>
-
       <ChatInput
         userInput={userInput}
         handleKeyPress={handleKeyPress}

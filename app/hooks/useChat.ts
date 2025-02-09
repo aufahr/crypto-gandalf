@@ -13,20 +13,21 @@ type UseChatResponse = {
 type UseChatProps = {
   onSuccess: (messages: AgentMessage[]) => void;
   conversationId?: string;
+  levelId?: string;
 };
 
 export default function useChat({
   onSuccess,
   conversationId,
+  levelId,
 }: UseChatProps): UseChatResponse {
   const [isLoading, setIsLoading] = useState(false);
 
   const postChat = useCallback(
     async (input: string) => {
       setIsLoading(true);
-
       try {
-        const response = await fetch(`${API_URL}/api/chat`, {
+        const response = await fetch(`${API_URL}/api/chat/${levelId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

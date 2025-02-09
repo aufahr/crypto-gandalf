@@ -1,5 +1,5 @@
 import { cn } from '@coinbase/onchainkit/theme';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import { useTransactionCount } from 'wagmi';
 import { AGENT_WALLET_ADDRESS, DEFAULT_PROMPT } from '../constants';
 import useChat from '../hooks/useChat';
@@ -9,35 +9,47 @@ import StreamItem from './StreamItem';
 
 type StreamProps = {
   className?: string;
+  levelId?: string;
 };
 
-export default function Stream({ className }: StreamProps) {
+export default function Stream({ className, levelId }: StreamProps) {
   const [streamEntries, setStreamEntries] = useState<StreamEntry[]>([]);
   const [isThinking, setIsThinking] = useState(true);
   const [loadingDots, setLoadingDots] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useMemo(() => {
+    setStreamEntries([])
+  }, [levelId]);
 
   const handleSuccess = useCallback((messages: AgentMessage[]) => {
     let message = messages.find((res) => res.event === 'agent');
     if (!message) {
       message = messages.find((res) => res.event === 'tools');
     }
+
     if (!message) {
       message = messages.find((res) => res.event === 'error');
     }
+
     const streamEntry: StreamEntry = {
       timestamp: new Date(),
       content: markdownToPlainText(message?.data || ''),
       type: 'agent',
     };
+
     setIsThinking(false);
+
     setStreamEntries((prev) => [...prev, streamEntry]);
+
     setTimeout(() => {
       setIsThinking(true);
     }, 800);
+
   }, []);
 
   const { postChat, isLoading } = useChat({
+    levelId,
     onSuccess: handleSuccess,
   });
 
@@ -74,11 +86,11 @@ export default function Stream({ className }: StreamProps) {
   });
 
   return (
-    <div className={cn('flex w-full flex-col md:flex md:w-1/2', className)}>
+    <div className={cn('flex flex-col', className)}>
       <div className="flex items-center border-[#5788FA]/50 border-b p-2">
         Total transactions: {transactionCount}
       </div>
-      <div className="max-w-full flex-grow overflow-y-auto p-4 pb-20">
+      <div className="flex-grow overflow-y-auto p-4 pb-20">
         <p className="text-zinc-500">Streaming real-time...</p>
         <div className="mt-4 space-y-2" role="log" aria-live="polite">
           {streamEntries.map((entry, index) => (
@@ -90,7 +102,7 @@ export default function Stream({ className }: StreamProps) {
         </div>
         {isThinking && (
           <div className="mt-4 flex items-center text-[#5788FA] opacity-70">
-            <span className="max-w-full font-mono">
+            <span className=" font-mono">
               Agent is observing
               {loadingDots}
             </span>
