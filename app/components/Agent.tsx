@@ -37,7 +37,7 @@ const CHALLENGES: Challenge[] = [
         title: 'Level 1',
         levelId: "easy",
         description: 'I will do what you ask me to :)',
-        goal_description: 'Get some balance to your wallet from faucet',
+        goal_description: 'Request balance from faucet',
         goals: [
             {rule_id: "faucet_tool"}
         ],
@@ -48,7 +48,7 @@ const CHALLENGES: Challenge[] = [
         title: 'Level 2',
         levelId: "medium",
         description: "I'm slightly harder",
-        goal_description: 'Get some balance to your wallet from faucet',
+        goal_description: 'Request balance from faucet',
         completed: false
     },
     {
@@ -56,7 +56,7 @@ const CHALLENGES: Challenge[] = [
         title: 'Level 3',
         levelId: "hard",
         description: "I'm not talking to you",
-        goal_description: 'Get some balance to your wallet from faucet',
+        goal_description: 'Request balance from faucet',
         completed: false
     },
 ];
@@ -158,6 +158,8 @@ export default function Agent() {
                                     <div>
                                         <h3 className="font-semibold">{challenge.title}</h3>
                                         <p className="text-sm text-gray-400 mt-1">{challenge.description}</p>
+                                        <h3 className="font-semibold my-2">Goal</h3>
+                                        <p className="text-sm text-gray-400 mt-1">{challenge.goal_description}</p>
                                     </div>
                                     {completedChallenges.includes(challenge.id) && (
                                         <CheckCircle className="text-green-500 ml-2" size={18}/>
