@@ -76,7 +76,7 @@ export default function ChatInput({
             />
             <PremadeChatInput
               setUserInput={setUserInput}
-              text="Request funds from Faucet"
+              text="Request funds from faucet"
             />
           </div>
           <button
