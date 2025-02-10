@@ -76,7 +76,7 @@ export default function ChatInput({
             />
             <PremadeChatInput
               setUserInput={setUserInput}
-              text="Deploy an NFT"
+              text="Request funds from Faucet"
             />
           </div>
           <button
