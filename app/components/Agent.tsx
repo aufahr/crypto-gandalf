@@ -9,7 +9,7 @@ import {Button} from '@/components/ui/button';
 import {CheckCircle} from 'react-feather';
 import {Input} from "@/components/ui/input";
 import {generateUUID} from "@/app/utils";
-import { Dialog } from '@radix-ui/react-dialog';
+import {Dialog} from '@radix-ui/react-dialog';
 import {DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 
 interface ChallengeGoal {
@@ -26,10 +26,6 @@ interface Challenge {
     completed: boolean;
 }
 
-const faucet_tool_eval = () => {
-    //Implement
-    return false
-}
 
 const CHALLENGES: Challenge[] = [
     {
@@ -49,6 +45,9 @@ const CHALLENGES: Challenge[] = [
         levelId: "medium",
         description: "I'm slightly harder",
         goal_description: 'Request balance from faucet',
+        goals: [
+            {rule_id: "faucet_tool"}
+        ],
         completed: false
     },
     {
@@ -57,6 +56,9 @@ const CHALLENGES: Challenge[] = [
         levelId: "hard",
         description: "I'm not talking to you",
         goal_description: 'Request balance from faucet',
+        goals: [
+            {rule_id: "faucet_tool"}
+        ],
         completed: false
     },
 ];
@@ -215,7 +217,7 @@ export default function Agent() {
                             className="w-full mt-4"
                             onClick={() => {
                                 setCompletedGoals([])
-                                setActiveChallenge(activeChallenge +1)
+                                setActiveChallenge(activeChallenge + 1)
                             }}
                         >
                             Continue to Next Challenge
